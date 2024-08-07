@@ -1,6 +1,22 @@
 const moment = require("moment-jalaali")
 const BookModel = require("./../models/Book");
+const { rentModel } = require("../models/Rent");
 const checkBody = require("../validator/validBook")
+const path = require("path")
+const fs = require("fs")
+const removeImage = async (req) => {
+    try {
+        if (!req.files?.cover) {
+            return
+        }
+        const images = req.files.cover
+        images.forEach(image => {
+            fs.rmSync(path.join(image.path))
+        })
+    } catch (error) {
+        throw new Error(error.message)
+    }
+}
 
 const getAll = async (req, res) => {
   try {
@@ -31,9 +47,16 @@ const removeOne = async (req, res) => {
     }
     const removedBook = await BookModel.BooksMongooseModel.findByIdAndDelete(bookID);
     if (!removedBook) {
-      return res.status(404).send({ message: "Id Not Find!" })
+      return res.status(404).send({ message: "کتابی یافت نشد." })
     }
-    res.status(200).send(removedBook)
+    const isFree = removedBook.free==1?true:false;
+    if(!isFree){
+      return res.status(400).send({ message: "کتاب در دست اجاره است." })
+    }
+    removedBook.cover.forEach(image => {
+        await fs.rmSync(path.join(__dirname, "../../uploads/covers/", image))
+    })
+    res.status(200).send({message : "کتاب با موفقیت حذف شد.", IsSuccess : true , status:200})
   } catch (error) {
     res.status(400).send(error)
   }
@@ -41,18 +64,31 @@ const removeOne = async (req, res) => {
 
 const newBook = async (req, res) => {
   try {
-    const ResultCheckBody = checkBody(req.body)
+    const {title, author , price} = req.body
+    const ResultCheckBody = checkBody({title, author , price})
     if (ResultCheckBody !== true) {
-      res.status(422).send(ResultCheckBody)
-    } else {
-      let { title, author, price } = req.body
-      const createAt = moment().format("jYYYY/jM/jD HH:mm:ss")
-      const updatedAt = moment().format("jYYYY/jM/jD HH:mm:ss")
-      const BookN = await BookModel.BooksMongooseModel.create({ title, author, price, free: 1, createAt, updatedAt })
-      res.status(201).send(BookN)
+      await removeImage(req)
+      return res.status(400).send(ResultCheckBody)
     }
+    const HasBook = await BookModel.findOne({ $and: [{ title }, { author }] })
+    if (HasBook) {
+        await removeImage(req)
+        return res.status(400).send({ message: "این کتاب وجود دارد." })
+    }
+
+    const cover = []
+    req.files.cover.forEach(image => {
+        cover.push(image.filename)
+    })
+    
+    const createAt = moment().format("jYYYY/jM/jD HH:mm:ss")
+    const updatedAt = moment().format("jYYYY/jM/jD HH:mm:ss")
+    const BookN = await BookModel.BooksMongooseModel.create({ title, author, price, free: 1, createAt, updatedAt , cover})
+    res.status(201).send(BookN)
+    
   } catch (error) {
-    res.status(404).send(error)
+    await removeImage(req)
+    res.status(400).send(error)
   }
 }
 
