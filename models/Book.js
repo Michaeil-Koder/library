@@ -21,6 +21,12 @@ const BooksMongooseSchema=mongoose.Schema({
     minLength:2,
     maxLength:15
   },
+  cover: {
+    type: Array,
+    minLength: 1,
+    maxLength: 5,
+    // required: true
+  },
   free:{
     type:Number
   },
