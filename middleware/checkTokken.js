@@ -8,7 +8,7 @@ const userModel = require("../models/User")
 const checkTokken = async (req, res, next) => {
     try {
         const AllCookie = req.headers?.cookie?.split(";") // اگر کوکی های دیگری بود جدا شود
-        const cookie = AllCookie?.find(x => x.startsWith(" tokken="))// کوکی ای که برای jwt ست شده را پیدا کند
+        const cookie = AllCookie?.find(x => x.trim().startsWith("tokken="))// کوکی ای که برای jwt ست شده را پیدا کند
         const authCookie = cookie?.split("=")
         if (authCookie?.length !== 2) {
             return next()
