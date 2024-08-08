@@ -18,10 +18,8 @@ const checkTokken = async (req, res, next) => {
         }
         const idTokken = jwt.verify(authCookie[1], process.env.JWT_SECURITY)
         const user = await userModel.findById(idTokken.id, "-password")
-        // const HasBan= await banModel.findOne({user:user._id})
-        // if(HasBan){
-        //     return res.status(403).send({message:"متاسفیم شما توسط مدیر بن شده اید"})
-        // }
+
+
         req.body.user = user
         next()
     } catch (err) {
