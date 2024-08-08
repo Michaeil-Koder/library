@@ -1,25 +1,22 @@
-const mongoose=require("mongoose")
-mongoose.connect(process.env.DbUrl)
+const mongoose = require("mongoose");
 
-
-
-const BooksMongooseSchema=mongoose.Schema({
+const BooksMongooseSchema = mongoose.Schema({
   title: {
-    type:String,
-    required:true,
-    minLength:3,
-    maxLength:15
+    type: String,
+    required: true,
+    minLength: 3,
+    maxLength: 15,
   },
   author: {
-    type:String,
-    required:true,
-    minLength:3,
-    maxLength:15
+    type: String,
+    required: true,
+    minLength: 3,
+    maxLength: 15,
   },
   price: {
-    type:Number,
-    minLength:2,
-    maxLength:15
+    type: Number,
+    minLength: 2,
+    maxLength: 15,
   },
   cover: {
     type: Array,
@@ -27,25 +24,24 @@ const BooksMongooseSchema=mongoose.Schema({
     maxLength: 5,
     // required: true
   },
-  free:{
-    type:Number
+  free: {
+    type: Number,
   },
-  createAt:{
-    type:String
+  createAt: {
+    type: String,
   },
-  updatedAt:{
-    type:String
-  }
-})
+  updatedAt: {
+    type: String,
+  },
+});
 
+BooksMongooseSchema.virtual("comment", {
+  ref: "Comment",
+  localField: "_id",
+  foreignField: "bookID",
+});
 
-BooksMongooseSchema.virtual("comment",{
-  ref:"Comment",
-  localField:"_id",
-  foreignField:"bookID"
-})
-
-const BooksMongooseModel=mongoose.model("books",BooksMongooseSchema)
+const BooksMongooseModel = mongoose.model("books", BooksMongooseSchema);
 module.exports = {
   BooksMongooseModel,
   mongoose,

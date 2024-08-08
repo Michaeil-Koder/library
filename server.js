@@ -1,41 +1,66 @@
-const express = require("express")
-const server = express()
-const cors = require("cors")
-server.use(express.json())
-server.use(express.urlencoded({ extended: false }))
-
-require("./configs/db")
-
+const express = require("express");
+const server = express();
+const cors = require("cors");
+const session = require("express-session")
+const flash = require("express-flash")
+const path = require("path")
 
 
-const uploader = require("./middleware/multer")
+
+require("./configs/db");
 
 
 const booksRoutes = require("./routes/booksRoutes");
-const usersRoutes = require("./routes/userRoutes")
+const usersRoutes = require("./routes/userRoutes");
 const rentRoutes = require("./routes/rentsRoutes");
 const commentRoutes = require("./routes/commentsRoutes");
+const checkTokken = require("./middleware/checkTokken");
 
 // Middleware
-server.use(cors())
+server.use(express.json())
+server.use(express.urlencoded({ extended: false }))
 
-// Route Users
-server.use("/api/users/", usersRoutes)
-// Route Books
-server.use("/api/books/", booksRoutes)
-// Route Rents
-server.use("/api/books/rent", rentRoutes)
+server.use("/css", express.static(path.join(__dirname, "./public/css")))
+server.use("/fonts", express.static(path.join(__dirname, "./public/fonts")))
+server.use("/images", express.static(path.join(__dirname, "./public/images")))
+server.use("/js", express.static(path.join(__dirname, "./public/js")))
 
-// uploade file
-server.post("/api/photo", uploader.single("profile"), async (req, res) => {
-    res.status(200).send(req.file)
+server.set("view engine", "ejs")
+server.set("views", path.join(__dirname, "./views"))
+server.use(cors({
+  origin: "*"
+}))
+server.use(session({
+  saveUninitialized: true,
+  resave: false,
+  secret: process.env.SESSION_SECURITY
+}))
+server.use(flash())
+
+
+// Home page 
+server.use("/", checkTokken, (req, res, next) => {
+  if (req.path === "/") {
+    const { user } = req?.body
+    return res.render("homepage", {
+      name: user?.name,
+      role: user?.role
+    })
+  }
+  next()
 })
 
+// Route Users
+server.use("/api/users/", usersRoutes);
+// Route Books
+server.use("/api/books/", booksRoutes);
+// Route Rents
+server.use("/api/books/rent", rentRoutes);
+
+
 // comment book
-server.use("/api/books/comment", commentRoutes)
-
-
+server.use("/api/books/comment", commentRoutes);
 
 server.listen(process.env.PORT, () => {
-    console.log(`Server Running On Port ${process.env.PORT}`);
+  console.log(`Server Running On Port ${process.env.PORT}`);
 });

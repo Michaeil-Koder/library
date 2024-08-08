@@ -25,6 +25,7 @@ const { validatorBody } = require("../validator/registerValidator")
  */
 
 Router.route("/register")
+    .get(userControllers.ShowRegisterPage)
     .post(validatorBody(), userControllers.create)
 
 /**
@@ -76,6 +77,7 @@ Router.route("/getMe")
  *                  description: inform for login incorrect
  */
 Router.route("/login")
+    .get(userControllers.ShowRegisterPage)
     .post(userControllers.login)
 /**
  * @swagger
@@ -162,6 +164,5 @@ Router.route("/:id")
     .put(checkTokken, checkId, checkAdmin, userControllers.Uplevel)
     .get(checkTokken, checkId, checkColeader, userControllers.getOne)
     .delete(checkTokken, checkId, checkColeader, userControllers.remove)
-
 
 module.exports = Router

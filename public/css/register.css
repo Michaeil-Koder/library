@@ -1,0 +1,86 @@
+.register-body {
+  background: url(/images/LIBRARY2.jpg);
+  background-size: cover;
+}
+
+.gruping {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* align-items: center; */
+}
+
+.registration-page {
+  padding: 4.8rem;
+  margin: 4rem;
+
+  /* From https://css.glass */
+  background: rgba(227, 209, 209, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 2px solid rgba(252, 252, 252, 0.719);
+}
+
+.register-box {
+  grid-template-columns: 0.3fr 0.6fr;
+  row-gap: 2.4rem;
+  align-items: center;
+
+  border-left: 2px solid rgba(252, 252, 252, 0.719);
+}
+
+.sign-in-box {
+  grid-template-columns: 0.3fr 0.6fr;
+  row-gap: 2.4rem;
+  align-items: center;
+}
+
+.form-title {
+  font-size: 2.4rem;
+  /* border-bottom: 2px sold #000; */
+  margin-bottom: 1.8rem;
+  /* color: #fff; */
+
+  /* grid-column: 1 / -1; */
+  /* justify-self: center; */
+  text-align: center;
+}
+
+.form-btn {
+  grid-column: -1 / -3;
+  width: 60%;
+  justify-self: center;
+  padding: 0.2rem;
+  color: #000;
+  margin-top: 2rem;
+
+  transition: all 0.3s;
+}
+
+.form-btn:hover {
+  box-shadow: 8px 8px 30px rgba(0, 0, 0, 0.397);
+}
+
+label {
+  font-size: 1.6rem;
+  font-weight: 700;
+  /* color: #fff; */
+}
+
+input {
+  /* width: 30rem; */
+  border-radius: 7rem;
+  padding: 0.8rem 3rem;
+  border: 2px solid rgba(196, 169, 169, 0.719);
+  text-align: center;
+
+  transition: all 0.3s;
+}
+
+input:focus {
+  outline: none;
+  border: 2px solid #495057;
+  box-shadow: 8px 8px 30px rgba(0, 0, 0, 0.397);
+}

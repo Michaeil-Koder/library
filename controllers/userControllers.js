@@ -9,9 +9,20 @@ const cookie = require("cookie")
 const nodemailer = require("nodemailer")
 
 
+
+
+exports.ShowRegisterPage = async (req, res) => {
+    try {
+        res.render("register.ejs")
+    } catch (error) {
+        return res.status(500).send(error)
+    }
+}
+
+
 exports.create = async (req, res) => {
     try {
-        const { name, email, phone, password, confirmPassword } = req.body
+        const { name, email, phone, password } = req.body
         const resultCheck = validationResult(req)
         if (!resultCheck.isEmpty()) {
             return res.status(405).send(resultCheck)
@@ -56,20 +67,14 @@ exports.create = async (req, res) => {
             expiresIn: "5day"
         })
         delete userObj.password
-        // res.setHeader("Set-Cookie", cookie.serialize("tokken", tokken), {
-        //     httpOnly: true,
-        //     signed: true,
-        //     maxAge: 60 * 60 * 24 * 5 * 1000,
-        //     // domain: req.headers.origin,
-        //     path: "/"
-        // })
+
         res.cookie("tokken", tokken, {
             httpOnly: true,
             maxAge: 60 * 1000 * 60 * 24 * 5,
             secure: true,
             path: "/"
         })
-        res.status(201).send({ user: userObj })
+        res.render("homepage.ejs")
     } catch (err) {
         console.log(err)
         return res.status(err.status || 400).send(err.message || { message: "خطایی روی داده است" })
@@ -235,7 +240,7 @@ exports.login = async (req, res) => {
             path: `/`
         })
 
-        res.status(200).send({ message: "ورود موفقیت آمیز بود" })
+        res.render("homepage.ejs")
     } catch (err) {
         return res.status(err.status || 400).send(err.message || { message: "خطایی روی داده است" })
     }
