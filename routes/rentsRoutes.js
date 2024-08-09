@@ -3,6 +3,7 @@ const express = require("express")
 const checkTokken = require("../middleware/checkTokken")
 const checkColeader = require("../middleware/checkColeader")
 const checkBodyId = require("../middleware/checkBodyId")
+const checkId = require("../middleware/checkId")
 const rentRoute = express.Router()
 
 rentRoute
@@ -12,6 +13,6 @@ rentRoute
 
 rentRoute
     .route("/me")
-    .get(checkTokken, GetMeRent)
+    .get(checkTokken, checkId, GetMeRent)
 
 module.exports = rentRoute

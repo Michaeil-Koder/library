@@ -5,8 +5,6 @@ const moment = require("moment-jalaali")
 const jwt = require("jsonwebtoken")
 const { validationResult } = require("express-validator")
 const bcrypt = require("bcrypt")
-const cookie = require("cookie")
-const nodemailer = require("nodemailer")
 
 
 
@@ -22,7 +20,7 @@ exports.ShowRegisterPage = async (req, res) => {
 
 exports.create = async (req, res) => {
     try {
-        const { name, email, phone, password } = req.body
+        const { name, username, email, phone, password } = req.body
         const resultCheck = validationResult(req)
         if (!resultCheck.isEmpty()) {
             return res.status(405).send(resultCheck)
@@ -51,6 +49,7 @@ exports.create = async (req, res) => {
 
         const newUser = await userModel.create({
             name,
+            username,
             email,
             phone,
             password: hash,
@@ -74,10 +73,13 @@ exports.create = async (req, res) => {
             secure: true,
             path: "/"
         })
-        res.render("homepage.ejs")
+        res.redirect("/api/books")
     } catch (err) {
         console.log(err)
-        return res.status(err.status || 400).send(err.message || { message: "خطایی روی داده است" })
+        return res.render("partials/dashboard.ejs", {
+            error: "خطایی روی داده است.",
+            page: { nit: false }
+        })
     }
 }
 
@@ -85,29 +87,29 @@ exports.create = async (req, res) => {
 exports.Uplevel = async (req, res) => {
     try {
         const { id } = req.params
-        const { role } = req.body
-        const roleArray = ["ADMIN", "COLEADER"]
+
         const finduser = await userModel.findById(id)
-        // const HasBan = await banModel.findOne({ $or: [{ user: finduser._id }, { email: finduser.email }, { phone: finduser.phone }] })
+
+        let role = null
+
         if (!finduser) {
-            return res.status(404).send({ message: "کاربری یافت نشد" })
-        } else if (role === undefined || role.length === 0) {
-            return res.status(405).send({ message: "نقشی را وارد کنید" })
+            return res.redirect("/api/users/getall?error:notFound")
         }
-        // else if (HasBan) {
-        //     return res.status(401).send({ message: "این کاربر بن شده است ، لطفا آن را از بن خارج کنید" })
-        // }
+
+
         if (finduser.role === "ADMIN") {
-            return res.status(400).send({ message: "این کاربر با نقش ادمین در سایت ذخیره شده است" })
-        } else if (!roleArray.includes(role)) {
-            return res.status(405).send({ message: "ADMIN OR COLEADER" })
+            return res.redirect("/api/users/getall?error:erAdmin")
+        } else if (finduser.role === "COLEADER") {
+            role = "ADMIN"
+        } else if (finduser.role === "USER") {
+            role = "COLEADER"
         }
         const updatedAt = moment().format("jYYYY/jMM/jDD HH:mm:ss")
         const updowngrade = moment().format("jYYYY/jMM/jDD HH:mm:ss")
-        const upUser = await userModel.findByIdAndUpdate(id, { role, updowngrade, updatedAt }).select("-password -__v")
-        res.send(upUser)
+        await userModel.findByIdAndUpdate(id, { role, updowngrade, updatedAt })
+        res.redirect("/api/users/getall?error:upSuccess")
     } catch (err) {
-        return res.status(err.status || 400).send({ message: "خطایی روی داده است" })
+        return res.redirect("/api/users/getall?error:خطایی روی داده است.")
     }
 }
 
@@ -115,30 +117,25 @@ exports.Uplevel = async (req, res) => {
 exports.Downgrade = async (req, res) => {
     try {
         const { id } = req.params
-        const { role } = req.body
-        const roleArray = ["COLEADER", "USER"]
+        let role = null;
         const finduser = await userModel.findById(id)
         if (!finduser) {
-            return res.status(404).send({ message: "کاربری یافت نشد" })
-        } else if (role === undefined || role.length === 0) {
-            return res.status(405).send({ message: "نقشی را وارد نمایید" })
-        } else if (!roleArray.includes(role)) {
-            return res.status(405).send({ message: "نقش را به درستی وارد نمایید" })
+            return res.redirect("/api/users/getall?error:notFound")
         } else if (finduser.role === "USER") {
-            return res.status(403).send({ message: "این کاربر با نقش یوزر در سایت ذخیره شده است" })
+            return res.redirect("/api/users/getall?error:user")
         } else if (req.body.user.updowngrade > finduser.updowngrade && req.body.user.role === "ADMIN" && finduser.role === "ADMIN") {
-            return res.status(401).send({ message: "شما مجاز به این درخواست نمی باشید" })
-        } else if (req.body.user.role === "COLEADER" && finduser.role === "COLEADER") {
-            return res.status(401).send({ message: "شما مجاز به این درخواست نمی باشید" })
-        } else if (req.body.user.role === "COLEADER" && finduser.role === "ADMIN") {
-            return res.status(401).send({ message: "شما مجاز به این درخواست نمی باشید" })
+            return res.redirect("/api/users/getall?error:admin")
+        } else if (finduser.role === "COLEADER") {
+            role = "USER"
+        } else if (finduser.role === "ADMIN") {
+            role = "COLEADER"
         }
         const updatedAt = moment().format("jYYYY/jMM/jDD HH:mm:ss")
         const updowngrade = moment().format("jYYYY/jMM/jDD HH:mm:ss")
         await userModel.findByIdAndUpdate(id, { role, updowngrade, updatedAt }).select("-password -__v")
-        res.send({ message: `${finduser.name} از نقش ${finduser.role} به نقش ${role} تنزیل پیدا کرد.` })
+        res.redirect(`/api/users/getall?error:downSuccess`)
     } catch (err) {
-        return res.status(err.status || 400).send({ message: "خطایی روی داده است" })
+        return res.redirect("/api/users/getall?error:false")
     }
 }
 
@@ -152,23 +149,53 @@ exports.getOne = async (req, res) => {
         }
         res.send(findOneUser)
     } catch (err) {
-        return res.status(err.status || 400).send(err.message || { message: "خطایی روی داده است" })
+        return res.render("partials/dashboard.ejs", {
+            error: "خطایی روی داده است.",
+            page: { nit: false }
+        })
     }
 }
 exports.getMe = async (req, res) => {
     try {
-        const { _id } = req.body.user
-        const finduser = await userModel.findById(_id, "-password")
-        // const HasBan = await banModel.findOne({ user: _id })
+        const { id } = req.body.user
+        const finduser = await userModel.findById(id, "-password")
+
+        let error = ""
+
         if (!finduser) {
-            return res.status(404).send({ message: "کاربری یافت نشد" })
+            error = "کاربری یافت نشد"
+        } else if (req.url.split("?").length === 2) {
+            let query = req.url.split("?")[1].split(":")
+            if (query[0] === "error") {
+                if (query[1] === "false") {
+                    error = "مشکلی رخ داده است."
+
+                } else if (query[1] === "Nvalid") {
+                    error = "لطفا به درستی فرم را پر کنید."
+                } else if (query[1] === "phone") {
+                    error = "شماره تلفن وارد شده صحیح نمیباشد."
+                } else if (query[1] === "Success") {
+                    error = "عملیات با موفقیت انجام شد."
+                }
+                else {
+                    error = query[1]
+                }
+            }
         }
-        // if (HasBan) {
-        //     return res.status(401).send({ message: "متاسفیم شما توسط مدیر بن شده اید." })
-        // } else
-        res.send(finduser)
+
+        res.render("partials/dashboard.ejs", {
+            user: finduser,
+            error,
+            page: {
+                informationUser: true
+            }
+        })
     } catch (err) {
-        return res.status(err.status || 400).send(err.message || { message: "خطایی روی داده است" })
+        console.log(err)
+        res.render("partials/dashboard.ejs", {
+            error: "خطایی روی داده است.",
+            page: { nit: false }
+        })
     }
 }
 
@@ -178,18 +205,18 @@ exports.remove = async (req, res) => {
         const { id } = req.params
         const finduser = await userModel.findById(id)
         if (!finduser) {
-            return res.status(404).send({ message: "کاربری یافت نشد" })
+            return res.redirect("/api/users/getall?error:notFound")
         } else if (req.body.user.role === 'COLEADER' && finduser.role === "ADMIN") {
-            return res.status(403).send({ message: "شما نمی توانید ادمین را حذف کنید" })
+            return res.redirect("/api/users/getall?error:notAccess")
         } else if (req.body.user.role === 'COLEADER' && finduser.role === "COLEADER") {
-            return res.status(403).send({ message: "شما نمی توانید هم مقام خود را حذف کنید" })
+            return res.redirect("/api/users/getall?error:notAccess")
         } else if (req.body.user.role === 'ADMIN' && finduser.role === "ADMIN" && req.body.user.updowngrade > finduser.updowngrade) {
-            return res.status(403).send({ message: "شما نمی توانید ادمین قدیمی تر را حذف کنید" })
+            return res.redirect("/api/users/getall?error:notAccess")
         }
         await userModel.findByIdAndDelete(id)
-        res.send({ message: "حذف با موفقیت انجام شد" })
+        return res.redirect("/api/users/getall?error:Success")
     } catch (err) {
-        return res.status(err.status || 400).send({ message: "خطایی روی داده است" })
+        return res.redirect("/api/users/getall?error:false")
     }
 }
 
@@ -198,12 +225,49 @@ exports.getAll = async (req, res) => {
     try {
         const id = req.body.user?.id
         const allUser = await userModel.find({ _id: { $ne: id } }, "-password -__v").lean().sort({ _id: -1 })
+        let error = "";
+        let query = null;
         if (allUser.length === 0) {
-            return res.status(404).send({ message: "کاربری ایجاد نشده است" })
+            error = "کاربری ایجاد نشده است."
+
+        } else if (req.url.split("?").length === 2) {
+            query = req.url.split("?")[1].split(":")
+            if (query[0] === "error") {
+                if (query[1] === "false") {
+                    error = "مشکلی رخ داده است."
+
+                } else if (query[1] === "user") {
+                    error = "این کاربر در نقش یوزر است."
+                } else if (query[1] === "erAdmin") {
+                    error = "این کاربر در نقش ادمین است."
+                } else if (query[1] === "admin") {
+                    error = "شما نمی توانید ادمین قبل از خود را تنزل کنید."
+                } else if (query[1] === "upSuccess") {
+                    error = "کاربر با موفقیت ارتقا یافت."
+                } else if (query[1] === "downSuccess") {
+                    error = "کاربر با موفقیت تنزل یافت."
+                } else if (query[1] === "notFound") {
+                    error = "کاربری یافت نشد."
+                } else if (query[1] === "notAccess") {
+                    error = "شما دسترسی لازم برای این عمل را ندارید."
+                } else if (query[1] === "Success") {
+                    error = "عملیات با موفقیت انجام شد."
+                }
+                else {
+                    error = query[1]
+                }
+            }
         }
-        res.send(allUser)
+        return res.render("partials/dashboard.ejs", {
+            error,
+            allUser,
+            page: { userList: true }
+        })
     } catch (err) {
-        return res.status(err.status || 400).send({ message: "خطایی روی داده است" })
+        return res.render("partials/dashboard.ejs", {
+            error: "خطایی روی داده است.",
+            page: { nit: false }
+        })
     }
 }
 
@@ -240,9 +304,12 @@ exports.login = async (req, res) => {
             path: `/`
         })
 
-        res.render("homepage.ejs")
+        res.redirect("/api/books")
     } catch (err) {
-        return res.status(err.status || 400).send(err.message || { message: "خطایی روی داده است" })
+        return res.render("partials/dashboard.ejs", {
+            error: "خطایی روی داده است.",
+            page: { nit: false }
+        })
     }
 }
 
@@ -253,8 +320,46 @@ exports.logout = async (req, res) => {
             maxAge: 1,
             secure: true,
             path: `/`
-        }).send({ message: "با موفقیت خارج شدید" })
+        })
+        res.redirect("/")
     } catch (err) {
-        return res.status(err.status || 400).send({ message: "خطایی روی داده است" })
+        return res.render("partials/dashboard.ejs", {
+            error: "خطایی روی داده است.",
+            page: { nit: false }
+        })
+    }
+}
+
+
+exports.update = async (req, res) => {
+    try {
+        const { name, username, email, phone, user } = req.body
+        const resultCheck = validationResult(req)
+        if (!resultCheck.isEmpty()) {
+            // return res.status(405).send(resultCheck)
+            return res.redirect("/api/users/me?error:Nvalid")
+        }
+        const regEx = new RegExp("^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$", "g")
+        if (!regEx.test(phone)) {
+            // return res.status(400).send({ message: "لطفا شماره را صحیح وارد کنید" })
+            return res.redirect("/api/users/me?error:phone")
+        }
+
+        const updatedAt = moment().format("jYYYY/jMM/jDD HH:mm:ss")
+
+        const UpdateUser = await userModel.findByIdAndUpdate(user.id, {
+            name,
+            username,
+            email,
+            phone,
+            updatedAt
+        })//update
+        res.redirect("/api/users/me?error:Success")
+    } catch (err) {
+        console.log(err)
+        return res.render("partials/dashboard.ejs", {
+            error: "خطایی روی داده است.",
+            page: { nit: false }
+        })
     }
 }

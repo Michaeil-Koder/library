@@ -1,0 +1,31 @@
+<div class="user-list">
+    <% allUser.forEach(user=> { %>
+
+        <div class="site-users">
+            <img src="/images/face.svg" alt="" class="user-pic" />
+            <p class="user--name">
+                <%= user.name %>
+            </p>
+            <p class="role">
+                <%= user.role %>
+            </p>
+            <form action="/api/users/<%= user._id %>" method="post">
+                <button type="submit" class="user-list-btn">
+                    <img src="/images/arrow_upward.svg" alt="" class="user-list-funcs" />
+                </button>
+            </form>
+            <form action="/api/users/<%= user._id %>/Downgrade" method="post">
+                <button class="user-list-btn">
+                    <img src="/images/arrow_downward.svg" alt="" class="user-list-funcs" />
+                </button>
+            </form>
+            <form action="/api/users/<%= user._id %>/remove" method="post">
+                <button class="user-list-btn">
+                    <img src="/images/delete_outline.svg" alt="" class="user-list-funcs" />
+                </button>
+
+            </form>
+        </div>
+        <% }) %>
+
+</div>

@@ -1,0 +1,24 @@
+<div class="list-of-books">
+    <% books.forEach(book=> { %>
+        <div class="added-books">
+            <div class="img-container">
+                <img src="/uploads/<%= book.cover[0] %>" alt="" class="book-cover" />
+            </div>
+            <div class="book-title-author">
+                <h2 class="book-title">
+                    <%=book.title%>
+                </h2>
+                <h2 class="book-author">
+                    <%=book.author%>
+                </h2>
+            </div>
+            <p class="book-price">
+                <%=book.price%> تومان
+            </p>
+            <form action="/api/books/rent" method="post">
+                <input type="hidden" value="<%= book._id %>" name="bookID">
+                <button type="submit" class="btn">به امانت گرفتن کتاب</button>
+            </form>
+        </div>
+        <% }) %>
+</div>

@@ -24,6 +24,7 @@ server.use("/css", express.static(path.join(__dirname, "./public/css")))
 server.use("/fonts", express.static(path.join(__dirname, "./public/fonts")))
 server.use("/images", express.static(path.join(__dirname, "./public/images")))
 server.use("/js", express.static(path.join(__dirname, "./public/js")))
+server.use("/uploads", express.static(path.join(__dirname, "./uploads/covers")))
 
 server.set("view engine", "ejs")
 server.set("views", path.join(__dirname, "./views"))
@@ -39,13 +40,9 @@ server.use(flash())
 
 
 // Home page 
-server.use("/", checkTokken, (req, res, next) => {
+server.use("/", (req, res, next) => {
   if (req.path === "/") {
-    const { user } = req?.body
-    return res.render("homepage", {
-      name: user?.name,
-      role: user?.role
-    })
+    return res.render("homepage.ejs")
   }
   next()
 })

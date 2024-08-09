@@ -1,0 +1,24 @@
+<div class="admin-panel-funcs">
+    <button class="add-book btn">اضافه کردن کتاب</button>
+
+
+    <%lastBooks.forEach(book=>{%>
+
+        <div class="added-books">
+            <div class="img-container">
+                <img src="/uploads/<%= book.cover[0] %>" alt="" class="book-cover" />
+            </div>
+            <div class="book-title-author">
+                <h2 class="book-title">
+                    <%= book.title %>
+                </h2>
+                <h2 class="book-author">
+                    <%= book.author %>
+                </h2>
+            </div>
+            <p class="book-price">
+                <%= book.price %> تومان
+            </p>
+        </div>
+        <% })%>
+</div>

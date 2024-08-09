@@ -3,20 +3,24 @@ const mongoose = require("mongoose")
 
 const checkId = (req, res, next) => {
     const id = req.body.user?.id
-    const ParamsId = req.params.id
+    const ParamsId = req.params?.id
     if (id !== undefined) {
         const isValidId = mongoose.Types.ObjectId.isValid(id)
         if (!isValidId) {
-            return res.status(400).send({ message: "This Id Not Valid" })
+            return res.render("partials/dashboard.ejs", {
+                error: "به نظر مشکلی وجود دارد ، از اینکه در سایت ثبت نام هستید اطمینان حاصل کنید.",
+                page: { nil: false }
+            })
         }
-    }// else {
-    //     return res.status(401).send({ message: "لطفا وارد شوید یا ثبت کنید" })
-    //     // return res.redirect("/page/login")
-    // }
+    }
+
     if (ParamsId !== undefined) {
         const isValidParamsId = mongoose.Types.ObjectId.isValid(ParamsId)
         if (!isValidParamsId) {
-            return res.status(400).send({ message: "This Id Params Not Valid" })
+            return res.render("partials/dashboard.ejs", {
+                error: "آیدی معتبر نمی باشد.",
+                page: { nil: false }
+            })
         }
     }
     next()

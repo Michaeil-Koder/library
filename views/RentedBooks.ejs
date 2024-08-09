@@ -1,0 +1,21 @@
+<div class="rented-books">
+    <% rentsMe.forEach(rentMe=> { %>
+        <div class="added-books">
+            <div class="img-container">
+                <img src="/uploads/<%= rentMe.Book[0].cover[0] %>" alt="" class="book-cover" />
+            </div>
+            <div class="book-title-author">
+                <h2 class="book-title">
+                    <%=rentMe.Book[0].title%>
+                </h2>
+                <h2 class="book-author">
+                    <%=rentMe.Book[0].author%>
+                </h2>
+            </div>
+            <p class="book-price">
+                <%=rentMe.Book[0].price%> تومان
+            </p>
+        </div>
+        <% }) %>
+
+</div>

@@ -13,15 +13,18 @@ const { storage, fileFilter } = require("../middleware/multer");
 // BooksRoutes.post("/",(req,res)=>{
 //     bookController.newBook(req,res)
 // })
+BooksRoutes.route("/last_add")
+    .get(checkTokken, checkColeader, bookController.showLast)
 
 BooksRoutes
     .route("/:id")
     .get(checkId, bookController.getOne)
 
+
 BooksRoutes
     .route("/")
     .get(bookController.getAll)
-    .post(checkTokken, checkColeader,multer({ storage, fileFilter, limits: { fileSize: 1024 * 1024 * 5 } }).fields([
+    .post(checkTokken, checkColeader, multer({ storage, fileFilter, limits: { fileSize: 1024 * 1024 * 5 } }).fields([
         { name: "cover", maxCount: 5 }
     ]), bookController.newBook)
 // BooksRoutes.delete("/:id",bookController.removeOne)

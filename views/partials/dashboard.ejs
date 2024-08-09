@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>اطلاعات کاربری</title>
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet"
+    type="text/css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/register.css" />
+</head>
+
+<body class="dashboard-body">
+  <!-- <header>
+      <a href="homepage.html"
+        ><img
+          src="/images/لوگوی پروژه.png"
+          alt="لوگوی پروژه"
+          class="dashboard-logo"
+      /></a>
+    </header> -->
+  <div class="dashboard-page">
+    <div class="site-funcs">
+      <ul class="dashboard-funcs">
+        <li>
+          <a href="/api/users/me" class="dashboard-funcs-list user-info">
+            اطلاعات کاربری
+          </a>
+        </li>
+        <li>
+          <a href="/api/books/last_add" class="dashboard-funcs-list admin-panel">پنل ادمین</a>
+        </li>
+        <li>
+          <a href="/api/users/getall" class="dashboard-funcs-list user-list">
+            نمایش لیست کاربران
+          </a>
+        </li>
+        <li>
+          <a href="/api/books" class="dashboard-funcs-list books-list">
+            نمایش لیست کتاب‌ها
+          </a>
+        </li>
+        <li>
+          <a href="/api/books/rent/me" class="dashboard-funcs-list rent-book">
+            لیست کتاب‌های قرض گرفته شده
+          </a>
+        </li>
+        <li>
+          <form action="/api/users/logout" method="post">
+            <button type="submit" class="dashboard-funcs-list exit" id="exit">
+              خروج از حساب
+            </button>
+
+          </form>
+        </li>
+      </ul>
+    </div>
+    <div class="func-responses">
+      <!-- NOTE: اطلاعات کاربری -->
+
+
+      <!-- NOTE: فانکشن‌های پنل ادمین -->
+
+
+      <!-- NOTE: لیست کاربران -->
+
+
+      <!-- NOTE: لیست کتاب‌ها -->
+
+
+      <!-- NOTE: کتاب‌های قزض گرفته شده -->
+
+      <% if (page.bookList) { %>
+        <%- include('../bookList.ejs') %>
+          <% } else if (page.informationUser) { %>
+            <%- include('../informationUser.ejs') %>
+              <% } else if (page.PanelAdmin) { %>
+                <%- include('../PanelAdmin.ejs') %>
+                  <% } else if (page.RentedBooks) { %>
+                    <%- include('../RentedBooks.ejs') %>
+                      <% } else if (page.userList) { %>
+                        <%- include('../userList.ejs') %>
+                          <% }else { %>
+
+                            <% } %>
+    </div>
+  </div>
+
+  <!-- NOTE: مشخصات کتاب -->
+  <div class="book-info hidden">
+    <form action="/api/books/" method="post" class="book-info-form" enctype="multipart/form-data">
+      <div class="book-heading">
+        <h2>مشخصات کتاب</h2>
+        <button type="button" class="close-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
+            <path d="M0 0h24v24H0z" fill="none" />
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+          </svg>
+        </button>
+      </div>
+      <label for="title">عنوان کتاب</label>
+      <input type="text" name="title" id="title" />
+      <label for="author">نویسنده‌ی کتاب</label>
+      <input type="text" name="author" id="author" />
+      <label for="price">قیمت</label>
+      <input type="number" name="price" id="price" />
+      <label for="cover">عکس کتاب</label>
+      <input type="file" accept="image/*" name="cover" id="cover" multiple />
+      <button class="btn">اضافه کردن</button>
+    </form>
+  </div>
+
+
+  <% if (error.length!=0) { %>
+    <div class="error errorClass">
+      <div class="error-text">
+        <img src="/images/error.svg" alt="" class="error-icon" />
+      </div>
+      <p class="error-desc">
+        <%= error %>
+      </p>
+      <button class="btn btn_understand">متوجه شدم</button>
+    </div>
+
+    <% } else { %>
+      <div class="error hidden">
+        <div class="error-text">
+          <img src="/images/error.svg" alt="" class="error-icon" />
+        </div>
+        <p class="error-desc">
+          خطایی نیست
+        </p>
+        <button class="btn btn_understand">متوجه شدم</button>
+      </div>
+      <% } %>
+
+        <script src="/js/script.js"></script>
+</body>
+
+</html>

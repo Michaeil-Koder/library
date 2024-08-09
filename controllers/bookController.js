@@ -20,10 +20,27 @@ const removeImage = async (req) => {
 
 const getAll = async (req, res) => {
   try {
-    const books = await BookModel.BooksMongooseModel.find({}).lean();
+    const books = await BookModel.BooksMongooseModel.find({}).sort({ updatedAt: -1 }).lean();
 
-    res.status(200).send(books);
+    let error = "";
+    if (books.length == 0) {
+      error = "کتابی در سیستم ثبت نشده است.";
+    } else if (req.url.split("?").length === 2) {
+      let query = req.url.split("?")[1].split(":")
+      if (query[0] === "rented" && query[1] === "false") {
+        error = "این کتاب را فرد دیگری به امانت برده است."
+      }
+    }
+
+    res.render("partials/dashboard.ejs", {
+      books,
+      error,
+      page: {
+        bookList: true
+      }
+    })
   } catch (error) {
+    console.log(error.message)
     res.status(404).send(error);
   }
 };
@@ -88,7 +105,7 @@ const newBook = async (req, res) => {
     req.files.cover.forEach((image) => {
       cover.push(image.filename);
     });
-    console.log(req);
+
 
     const createAt = moment().format("jYYYY/jM/jD HH:mm:ss");
     const updatedAt = moment().format("jYYYY/jM/jD HH:mm:ss");
@@ -101,7 +118,8 @@ const newBook = async (req, res) => {
       updatedAt,
       cover,
     });
-    res.status(201).send(BookN);
+    // res.status(201).send(BookN);
+    res.redirect("/api/books/last_add")
   } catch (error) {
     await removeImage(req);
     res.status(400).send(error);
@@ -160,6 +178,26 @@ const UpBook = async (req, res) => {
   }
 };
 
+const showLast = async (req, res) => {
+  try {
+
+    const lastBooks = await BookModel.BooksMongooseModel
+      .find({})
+      .sort({ createAt: -1 })  // بر اساس شناسه‌ی کتاب‌ها به صورت نزولی مرتب می‌شود
+      .limit(5)           // محدود به 5 نتیجه
+      .lean();
+    res.render("partials/dashboard.ejs", {
+      error: "",
+      page: {
+        PanelAdmin: true
+      },
+      lastBooks
+    })
+  } catch (error) {
+
+  }
+}
+
 module.exports = {
   getAll,
   removeOne,
@@ -167,4 +205,5 @@ module.exports = {
   BackBook,
   UpBook,
   getOne,
+  showLast
 };

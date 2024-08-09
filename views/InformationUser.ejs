@@ -1,0 +1,31 @@
+<form action="/api/users/update" method="post" class="dashboard-form ">
+    <div class="form-item">
+        <label for="username" class="dashboard-label">نام کاربری</label>
+        <input type="text" name="username" value="<%= user.username %>" id="username" />
+    </div>
+    <div class="form-item">
+        <label for="fname" class="dashboard-label">نام و نام خانوادگی</label>
+        <input type="text" name="name" value="<%= user.name %>" id="fname" />
+    </div>
+    <div class="form-item">
+        <label for="email" class="dashboard-label">ایمیل</label>
+        <input type="email" name="email" value="<%= user.email %>" id="email" />
+    </div>
+    <div class="form-item">
+        <label for="phone-number" class="dashboard-label">شماره تلفن</label>
+        <input type="tel" name="phone" value="<%= user.phone %>" id="phone-number" />
+    </div>
+    <!-- <div class="form-item">
+        <label for="password" class="dashboard-label">کلمه عبور</label>
+        <input type="password" name="password" value="" id="password" />
+    </div> -->
+    <div class="form-item">
+        <h2 class="user-type">رتبه</h2>
+        <p class="text">
+            <%= user.role %>
+        </p>
+    </div>
+    <div class="form-button">
+        <button type="submit" class="btn">به روز رسانی اطلاعات</button>
+    </div>
+</form>
